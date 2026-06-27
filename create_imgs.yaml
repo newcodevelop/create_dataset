@@ -111,7 +111,7 @@ setupCommands:
 
   - >-
     git clone
-    "https://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@github.com/newcodevelop/create_dataset.git"
+    "https://xxxx@github.com/newcodevelop/create_dataset.git"
     /workspace/ocr_benchmark
 
   - chmod +x ./setup_xlit310_indicxlit.sh
@@ -135,6 +135,7 @@ setupCommands:
     --min-font-size 5 
     --limit 200
   
+  - git remote add origin https://xxxx@github.com/newcodevelop/create_dataset.git
   - git init
   - git add "/workspace/ocr_benchmark/v7_hi_indicxlit/"
   - git branch -M main
