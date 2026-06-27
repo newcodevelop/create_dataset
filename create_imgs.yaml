@@ -8,8 +8,8 @@ customLabels:
 # https://github.com/foundation-model-stack/base-images/pkgs/container/base
 #containerImage: ghcr.io/foundation-model-stack/base:pytorch-compile-latest-nightly-20250129
 #containerImage: ghcr.io/foundation-model-stack/base:pytorch-compile-latest-nightly-20250105
-# containerImage: icr.io/swe-agent/pytorch-base:2.7cu128
-containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
+containerImage: icr.io/swe-agent/pytorch-base:2.7cu128
+# containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
 # containerImage: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
 #containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
 numPods: 1
@@ -118,17 +118,32 @@ setupCommands:
  
     
 
+  # - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  # - bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda3
+  # - $HOME/miniconda3/bin/conda init bash
+  # - source ~/.bashrc
 
+  - wget -O Miniconda3-latest-Linux-x86_64.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  - bash Miniconda3-latest-Linux-x86_64.sh -b -u -p $HOME/miniconda3
+  - $HOME/miniconda3/bin/conda init bash
+  # - source ~/.bashrc
+  - . $HOME/miniconda3/etc/profile.d/conda.sh
+  - conda --version
 
   - >-
     git clone
     "https://github.com/newcodevelop/create_dataset.git"
     /workspace/ocr_benchmark
 
-  - chmod +x /workspace/ocr_benchmark/setup_xlit310_indicxlit.sh
-  - bash /workspace/ocr_benchmark/setup_xlit310_indicxlit.sh xlit310_final "$(pwd)"
+  - chmod +x /workspace/ocr_benchmark/setup_xlit310_indicxlit_fixed.sh
+  - bash /workspace/ocr_benchmark/setup_xlit310_indicxlit_fixed.sh xlit310_final "$(pwd)"
 
+
+  - . /home/miniconda3/etc/profile.d/conda.sh
   - conda activate xlit310_final
+
+  - export HF_TOKEN="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"
+  - huggingface-cli login --token "$HF_TOKEN"
 
   - >-
     TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 python /workspace/ocr_benchmark/layout_aware_invoice_localizer_v7_indicxlit_translation_fix.py         
@@ -137,7 +152,7 @@ setupCommands:
     --output-dir "/workspace/ocr_benchmark/v7_hi_indicxlit"        
     --target-lang hin_Deva          
     --translation-model ai4bharat/indictrans2-en-indic-dist-200M 
-    --device cpu   
+    --device cuda   
     --transliteration-backend indicxlit 
     --xlit-lang hi 
     --no-spacy 
