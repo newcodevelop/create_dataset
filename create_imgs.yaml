@@ -125,8 +125,8 @@ setupCommands:
     "https://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@github.com/newcodevelop/create_dataset.git"
     /workspace/ocr_benchmark
 
-  - chmod +x ./setup_xlit310_indicxlit.sh
-  - ./setup_xlit310_indicxlit xlit310_final "$(pwd)"
+  - chmod +x /workspace/ocr_benchmark/setup_xlit310_indicxlit.sh
+  - /workspace/ocr_benchmark/setup_xlit310_indicxlit xlit310_final "$(pwd)"
 
   - conda activate xlit310_final
 
