@@ -1,13 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ENV_NAME="${1:-xlit310}"
+# WORKDIR="${2:-$PWD}"
+
+# MINICONDA=/home/miniconda3
+
+# . $MINICONDA/etc/profile.d/conda.sh
+
+# conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+
+# conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# conda create -n "$ENV_NAME" python=3.10 -y
+
+# # Make conda activate work inside non-interactive shell.
+# source "$(conda info --base)/etc/profile.d/conda.sh"
+# conda activate "$ENV_NAME"
+
 ENV_NAME="${1:-xlit310}"
 WORKDIR="${2:-$PWD}"
 
+MINICONDA=/home/miniconda3
+
+# Load conda in non-interactive shell
+. "$MINICONDA/etc/profile.d/conda.sh"
+
+# Accept Anaconda default-channel ToS once
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# Create env if it does not already exist
 conda create -n "$ENV_NAME" python=3.10 -y
 
-# Make conda activate work inside non-interactive shell.
-source "$(conda info --base)/etc/profile.d/conda.sh"
+# Activate env
+. "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate "$ENV_NAME"
 
 python -m pip install -U "pip<24.1" "setuptools<70" wheel
