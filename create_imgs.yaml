@@ -60,16 +60,26 @@ environmentVariables:
     secret:
       key: accesstoken
       name: sd-git-access
+  # - name: HUGGINGFACE_HUB_CACHE
+  #   value: "/platform_storage/sdana027/huggingface/models"
+  # - name: HF_DATASETS_CACHE
+  #   value: "/platform_storage/sdana027/huggingface/datasets"
+  # - name: HF_MODULE_CACHE
+  #   value: "/platform_storage/sdana027/huggingface/modules"
+  # - name: HF_MODULES_CACHE
+  #   value: "/platform_storage/sdana027/huggingface/datasets_modules"
+  # - name: TRANSFORMERS_CACHE
+  #   value: /platform_storage/sdana027/huggingface/transformer/models
   - name: HUGGINGFACE_HUB_CACHE
-    value: "/platform_storage/sdana027/huggingface/models"
+    value: "/workspace/"
   - name: HF_DATASETS_CACHE
-    value: "/platform_storage/sdana027/huggingface/datasets"
+    value: "/workspace/"
   - name: HF_MODULE_CACHE
-    value: "/platform_storage/sdana027/huggingface/modules"
+    value: "/workspace/"
   - name: HF_MODULES_CACHE
-    value: "/platform_storage/sdana027/huggingface/datasets_modules"
+    value: "/workspace/"
   - name: TRANSFORMERS_CACHE
-    value: /platform_storage/sdana027/huggingface/transformer/models
+    value: "/workspace/"
 
 
 setupCommands:
@@ -95,36 +105,36 @@ setupCommands:
   # already present on persistent storage. Verify the published MD5 checksum,
   # then remove the archive's two nested wildreceipt/wildreceipt directories.
   - >-
-    mkdir -p /workspace/datasets;
-    if [ ! -f /workspace/datasets/wildreceipt/class_list.txt ] ||
-    [ ! -f /workspace/datasets/wildreceipt/train.txt ] ||
-    [ ! -f /workspace/datasets/wildreceipt/test.txt ] ||
-    [ ! -d /workspace/datasets/wildreceipt/image_files ]; then
-    rm -rf /workspace/datasets/wildreceipt &&
-    curl --fail --location --retry 5
-    https://download.openmmlab.com/mmocr/data/wildreceipt.tar
-    --output /workspace/datasets/wildreceipt.tar &&
-    echo "2a2c4a1b4777fb4fe185011e17ad46ae  /workspace/datasets/wildreceipt.tar"
-    | md5sum --check - &&
-    tar --extract --file /workspace/datasets/wildreceipt.tar
-    --directory /workspace/datasets
-    --no-same-owner
-    --no-same-permissions &&
-    rm -f /workspace/datasets/wildreceipt.tar;
-    fi;
-    test -f /workspace/datasets/wildreceipt/class_list.txt;
-    test -f /workspace/datasets/wildreceipt/train.txt;
-    test -f /workspace/datasets/wildreceipt/test.txt;
-    test -d /workspace/datasets/wildreceipt/image_files;
-    echo "WildReceipt dataset contents:";
-    ls -la /workspace/datasets/wildreceipt;
+    
 
 
 
   - >-
     git clone
-    "https://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@github.com/newcodevelop/ocr-benchmarks.git"
+    "https://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@github.com/newcodevelop/create_dataset.git"
     /workspace/ocr_benchmark
+
+  - chmod +x ./setup_xlit310_indicxlit.sh
+  - ./setup_xlit310_indicxlit xlit310_final "$(pwd)"
+
+  - conda activate xlit310_final
+
+  - >-
+    TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 python /workspace/ocr_benchmark/layout_aware_invoice_localizer_v7_indicxlit_translation_fix.py         
+    --ocr-dir "/workspace/ocr_benchmark/SROIE dataset/box"   
+    --image-dir "/workspace/ocr_benchmark/SROIE dataset/img"     
+    --output-dir "/workspace/ocr_benchmark/v7_hi_indicxlit"        
+    --target-lang hin_Deva          
+    --translation-model ai4bharat/indictrans2-en-indic-dist-200M 
+    --device cpu   
+    --transliteration-backend indicxlit 
+    --xlit-lang hi 
+    --no-spacy 
+    --font-path "/workspace/ocr_benchmark/NotoSansDevanagari[wdth,wght].ttf" 
+    --font-scale 0.72 
+    --min-font-size 5 
+    --limit 200
+
 
 
   # benchmark_wr_grounded.py must be available in the job's working directory.
