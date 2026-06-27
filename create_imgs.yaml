@@ -8,8 +8,8 @@ customLabels:
 # https://github.com/foundation-model-stack/base-images/pkgs/container/base
 #containerImage: ghcr.io/foundation-model-stack/base:pytorch-compile-latest-nightly-20250129
 #containerImage: ghcr.io/foundation-model-stack/base:pytorch-compile-latest-nightly-20250105
-containerImage: icr.io/swe-agent/pytorch-base:2.7cu128
-# containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
+# containerImage: icr.io/swe-agent/pytorch-base:2.7cu128
+containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
 # containerImage: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
 #containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
 numPods: 1
@@ -126,7 +126,7 @@ setupCommands:
     /workspace/ocr_benchmark
 
   - chmod +x /workspace/ocr_benchmark/setup_xlit310_indicxlit.sh
-  - ./workspace/ocr_benchmark/setup_xlit310_indicxlit.sh xlit310_final "$(pwd)"
+  - bash /workspace/ocr_benchmark/setup_xlit310_indicxlit.sh xlit310_final "$(pwd)"
 
   - conda activate xlit310_final
 
