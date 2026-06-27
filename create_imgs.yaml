@@ -1,0 +1,188 @@
+serviceAccountName: "gdr"
+namespace: wca-core-training
+jobName:  sd-merge-regmean-v2
+priority: "high-priority"
+customLabels:
+  - key: "project-name"
+    value: "wca4z"
+# https://github.com/foundation-model-stack/base-images/pkgs/container/base
+#containerImage: ghcr.io/foundation-model-stack/base:pytorch-compile-latest-nightly-20250129
+#containerImage: ghcr.io/foundation-model-stack/base:pytorch-compile-latest-nightly-20250105
+containerImage: icr.io/swe-agent/pytorch-base:2.7cu128
+# containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
+# containerImage: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
+#containerImage: us.icr.io/cil15-shared-registry/wca4z/torch:2.5.1cu126-devel-ubuntu
+numPods: 1
+numCpusPerPod: 40
+numGpusPerPod: 8
+totalMemoryPerPod: 800Gi
+
+numRoceGdr: 0
+topologyFileConfigMap: topo-gdr-2vf-canary
+# hostIgnoreList:
+#   - dmf-nnnqh-gdr-gpu-worker-3-gdfrz
+environmentVariables:
+  - name: NCCL_IB_HCA
+    value: mlx5_3,mlx5_4
+  - name: NCCL_IB_QPS_PER_CONNECTION
+    value: "8"
+  - name: NCCL_IB_SPLIT_DATA_ON_QPS
+    value: "0"
+  - name: NCCL_IB_PCI_RELAXED_ORDERING
+    value: "1"
+  - name: NCCL_IB_GID_INDEX
+    value: "3"
+  - name: NCCL_SOCKET_IFNAME
+    value: eth0 #net1-0,net1-1
+  - name: CUDA_VISIBLE_DEVICES
+    value: 0,1,2,3,4,5,6,7
+  - name: NCCL_ALGO
+    value: Ring
+  - name: NCCL_IGNORE_CPU_AFFINITY
+    value: "1"
+  - name: NCCL_DEBUG_SUBSYS
+    value: INIT,GRAPH,ENV,TUNING
+  - name: NCCL_IB_DISABLE
+    value: "0"
+  - name: NCCL_SOCKET_NTHREADS
+    value: "2"
+  - name: NCCL_CROSS_NIC
+    value: "0"
+  - name: NCCL_DEBUG
+    value: WARN
+  - name: OMP_NUM_THREADS
+    value: "16"
+  - name: NCCL_BUFFSIZE
+    value: "67108864"
+  - name: COS_BUCKET
+    value: /platform_storage
+  - name: GIT_PAT
+    secret:
+      key: accesstoken
+      name: sd-git-access
+  - name: HUGGINGFACE_HUB_CACHE
+    value: "/platform_storage/sdana027/huggingface/models"
+  - name: HF_DATASETS_CACHE
+    value: "/platform_storage/sdana027/huggingface/datasets"
+  - name: HF_MODULE_CACHE
+    value: "/platform_storage/sdana027/huggingface/modules"
+  - name: HF_MODULES_CACHE
+    value: "/platform_storage/sdana027/huggingface/datasets_modules"
+  - name: TRANSFORMERS_CACHE
+    value: /platform_storage/sdana027/huggingface/transformer/models
+
+
+setupCommands:
+  # These versions match the working docie310 environment. vLLM installs its
+  # required serving dependencies, including the compatible PyTorch stack.
+  - python -m pip install --upgrade pip
+  # - python -m pip install "vllm==0.21.0" "transformers==5.9.0" "qwen-vl-utils==0.0.14" "pillow==12.2.0"
+  # - pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+  # - pip install "vllm==0.5.5" "transformers<4.46" qwen-vl-utils pillow
+  # - python -m pip install -U outlines pyairports airportsdata
+  # - python -m pip install pyairports
+
+  - python -m pip install -U pip setuptools wheel uv
+  # - python -m pip uninstall -y vllm flashinfer-python flashinfer-cubin flashinfer
+  - uv pip install --system -U vllm==0.18.0
+  # - uv pip install --system -U vllm==0.21.0
+  - python -m pip install "fastapi<0.137" "starlette<0.50" --force-reinstall
+  - pip install peft accelerate bitsandbytes qwen-vl-utils pillow
+
+  # - python -m pip install flashinfer-python==0.6.6 ray soundfile
+
+  # Download WildReceipt from the official OpenMMLab mirror only when it is not
+  # already present on persistent storage. Verify the published MD5 checksum,
+  # then remove the archive's two nested wildreceipt/wildreceipt directories.
+  - >-
+    mkdir -p /workspace/datasets;
+    if [ ! -f /workspace/datasets/wildreceipt/class_list.txt ] ||
+    [ ! -f /workspace/datasets/wildreceipt/train.txt ] ||
+    [ ! -f /workspace/datasets/wildreceipt/test.txt ] ||
+    [ ! -d /workspace/datasets/wildreceipt/image_files ]; then
+    rm -rf /workspace/datasets/wildreceipt &&
+    curl --fail --location --retry 5
+    https://download.openmmlab.com/mmocr/data/wildreceipt.tar
+    --output /workspace/datasets/wildreceipt.tar &&
+    echo "2a2c4a1b4777fb4fe185011e17ad46ae  /workspace/datasets/wildreceipt.tar"
+    | md5sum --check - &&
+    tar --extract --file /workspace/datasets/wildreceipt.tar
+    --directory /workspace/datasets
+    --no-same-owner
+    --no-same-permissions &&
+    rm -f /workspace/datasets/wildreceipt.tar;
+    fi;
+    test -f /workspace/datasets/wildreceipt/class_list.txt;
+    test -f /workspace/datasets/wildreceipt/train.txt;
+    test -f /workspace/datasets/wildreceipt/test.txt;
+    test -d /workspace/datasets/wildreceipt/image_files;
+    echo "WildReceipt dataset contents:";
+    ls -la /workspace/datasets/wildreceipt;
+
+
+
+  - >-
+    git clone
+    "https://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@github.com/newcodevelop/ocr-benchmarks.git"
+    /workspace/ocr_benchmark
+
+
+  # benchmark_wr_grounded.py must be available in the job's working directory.
+  # - >-
+  #   python /workspace/ocr_benchmark/benchmark_wr_grounded_runtime.py
+  #   --dataset_root /workspace/datasets/wildreceipt
+  #   --split test
+  #   --model_preset numarkdown-8b-thinking
+  #   --num_samples 50
+  #   --image_mode full
+  #   --no_resize_image
+  #   --prompt_style flat
+  #   --verify_crops
+  #   --guided_json
+  # ||
+  # {
+  # echo "===== vLLM SERVER LOG =====";
+  # cat /workspace/vllm_qwen25vl_7b_instruct_wildreceipt_grounded_server.log || true;
+  # sleep 3600;
+  # exit 1;
+  # }
+  
+  # - >- 
+  #   python /workspace/ocr_benchmark/benchmark_wr_grounded_ocr.py 
+  #   --dataset_root /workspace/datasets/wildreceipt 
+  #   --model_preset deepseek-ocr 
+  #   --num_samples 10 
+  #   --image_mode full 
+  #   --no_resize_image 
+  #   --prompt_style flat 
+  #   --hf_cache_dir /workspace/hf_cache/
+  #   --verify_crops
+
+  - >- 
+    python /workspace/ocr_benchmark/train_hindi_sroie_qwenvl_lora.py run_all 
+    --model Qwen/Qwen2.5-VL-7B-Instruct 
+    --train-jsonl /workspace/ocr_benchmark/hindi_sroie_qwenvl_data/train.jsonl 
+    --val-jsonl /workspace/ocr_benchmark/hindi_sroie_qwenvl_data/val.jsonl 
+    --test-jsonl /workspace/ocr_benchmark/hindi_sroie_qwenvl_data/test.jsonl 
+    --output-dir /workspace/ocr_benchmark/qwen25vl_hindi_sroie_lora 
+    --work-dir /workspace/ocr_benchmark/hindi_sroie_results 
+    --load-4bit 
+    --epochs 3 
+    --batch-size 1 
+    --grad-accum 8
+ 
+  
+  - sleep infinity
+  
+  #- sleep infinity
+
+mainProgram: ""
+
+imagePullSecrets:
+  - name: all-icr-io
+
+volumes:
+  - name: wxa4z-sil-india-pvc
+    claimName: wxa4z-sil-india-pvc
+    mountPath: /any_mount_path_of_your_choice
+# helm template -f /dccstor/sasdana27/Year_2025/MODEL_MERGE/baban_exp/baban_model_merging.yaml mlbatch/pytorchjob-generator | oc create -f-
