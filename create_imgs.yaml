@@ -104,14 +104,14 @@ setupCommands:
   # Download WildReceipt from the official OpenMMLab mirror only when it is not
   # already present on persistent storage. Verify the published MD5 checksum,
   # then remove the archive's two nested wildreceipt/wildreceipt directories.
-  - >-
+ 
     
 
 
 
   - >-
     git clone
-    "https://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@github.com/newcodevelop/create_dataset.git"
+    "https://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@github.com/newcodevelop/create_dataset.git"
     /workspace/ocr_benchmark
 
   - chmod +x ./setup_xlit310_indicxlit.sh
@@ -134,6 +134,14 @@ setupCommands:
     --font-scale 0.72 
     --min-font-size 5 
     --limit 200
+  
+  - git remote add origin https://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@github.com/newcodevelop/create_dataset.git
+  - git init
+  - git add "/workspace/ocr_benchmark/v7_hi_indicxlit/"
+  - git branch -M main
+  - git push -u origin main
+
+
 
 
 
