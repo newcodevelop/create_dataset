@@ -53,6 +53,7 @@ python -m pip install \
   sacremoses \
   "torch>=2.1,<2.4" \
   "tensorboard==2.15.2"
+  tqdm
 
 # Prefer conda-forge fairseq to avoid compiling old fairseq C++ extensions on macOS ARM.
 conda install -c conda-forge fairseq -y
