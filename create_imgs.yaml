@@ -85,25 +85,36 @@ environmentVariables:
 setupCommands:
   # These versions match the working docie310 environment. vLLM installs its
   # required serving dependencies, including the compatible PyTorch stack.
-  - python -m pip install --upgrade pip
+  
   # - python -m pip install "vllm==0.21.0" "transformers==5.9.0" "qwen-vl-utils==0.0.14" "pillow==12.2.0"
   # - pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
   # - pip install "vllm==0.5.5" "transformers<4.46" qwen-vl-utils pillow
   # - python -m pip install -U outlines pyairports airportsdata
   # - python -m pip install pyairports
 
-  - python -m pip install -U pip setuptools wheel uv
+  
   # - python -m pip uninstall -y vllm flashinfer-python flashinfer-cubin flashinfer
-  - uv pip install --system -U vllm==0.18.0
+  
   # - uv pip install --system -U vllm==0.21.0
-  - python -m pip install "fastapi<0.137" "starlette<0.50" --force-reinstall
-  - pip install peft accelerate bitsandbytes qwen-vl-utils pillow
+  
+  
 
   # - python -m pip install flashinfer-python==0.6.6 ray soundfile
 
   # Download WildReceipt from the official OpenMMLab mirror only when it is not
   # already present on persistent storage. Verify the published MD5 checksum,
   # then remove the archive's two nested wildreceipt/wildreceipt directories.
+
+
+
+
+
+
+  # - python -m pip install --upgrade pip
+  # - python -m pip install -U pip setuptools wheel uv
+  # - uv pip install --system -U vllm==0.18.0
+  # - python -m pip install "fastapi<0.137" "starlette<0.50" --force-reinstall
+  # - pip install peft accelerate bitsandbytes qwen-vl-utils pillow
  
     
 
