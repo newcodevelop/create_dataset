@@ -187,18 +187,6 @@ setupCommands:
   #   --hf_cache_dir /workspace/hf_cache/
   #   --verify_crops
 
-  - >- 
-    python /workspace/ocr_benchmark/train_hindi_sroie_qwenvl_lora.py run_all 
-    --model Qwen/Qwen2.5-VL-7B-Instruct 
-    --train-jsonl /workspace/ocr_benchmark/hindi_sroie_qwenvl_data/train.jsonl 
-    --val-jsonl /workspace/ocr_benchmark/hindi_sroie_qwenvl_data/val.jsonl 
-    --test-jsonl /workspace/ocr_benchmark/hindi_sroie_qwenvl_data/test.jsonl 
-    --output-dir /workspace/ocr_benchmark/qwen25vl_hindi_sroie_lora 
-    --work-dir /workspace/ocr_benchmark/hindi_sroie_results 
-    --load-4bit 
-    --epochs 3 
-    --batch-size 1 
-    --grad-accum 8
  
   
   - sleep infinity
