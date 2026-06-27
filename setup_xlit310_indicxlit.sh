@@ -89,6 +89,12 @@ python -m pip install "transformers==4.51.3" sentencepiece sacremoses accelerate
 python -m pip install indictranstoolkit
 
 
+conda install -c conda-forge libstdcxx-ng libgcc-ng -y
+
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+
+python -c "import torch; print(torch.__version__)"
+
 echo "\nEnvironment created: $ENV_NAME"
 echo "Run from this directory so the local urduhack stub is used: $WORKDIR"
 echo "Use: TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 python your_script.py ..."
