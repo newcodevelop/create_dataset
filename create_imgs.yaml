@@ -126,7 +126,7 @@ setupCommands:
     /workspace/ocr_benchmark
 
   - chmod +x /workspace/ocr_benchmark/setup_xlit310_indicxlit.sh
-  - /workspace/ocr_benchmark/setup_xlit310_indicxlit xlit310_final "$(pwd)"
+  - ./workspace/ocr_benchmark/setup_xlit310_indicxlit.sh xlit310_final "$(pwd)"
 
   - conda activate xlit310_final
 
