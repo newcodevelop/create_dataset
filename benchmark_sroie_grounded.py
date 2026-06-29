@@ -519,7 +519,7 @@ def parse_args() -> argparse.Namespace:
     if args.full_dataset:
         args.num_samples = None
     if args.img_dir is None:
-        args.img_dir = os.path.join(args.dataset_root, "img/img")
+        args.img_dir = os.path.join(args.dataset_root, "realistic_images")
     if args.gt_dir is None:
         args.gt_dir = os.path.join(args.dataset_root, "entities")
     if args.ocr_dir is None:
